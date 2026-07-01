@@ -71,7 +71,7 @@ def dataBuilder(
     distance : float
         maximum distance from the station
     save_dataset : bool
-        True to save the subset dataset as a Seisbench dataset
+        True to simCLR the subset dataset as a Seisbench dataset
 
     return : subset : sbd.STEAD In-memory SeisBench dataset object containing the randomly selected traces.
     """

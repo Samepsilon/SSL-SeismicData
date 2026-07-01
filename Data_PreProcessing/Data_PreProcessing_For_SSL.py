@@ -1,4 +1,5 @@
 from scipy.signal import butter, filtfilt
+from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 import numpy as np
 import pathlib
@@ -6,15 +7,28 @@ import pathlib
 from STEAD_Data_Extraction import *
 
 BASE_DIR = Path(__file__).resolve().parent
-X_output_path = BASE_DIR.parent / "data"/"x.npy"
-y_output_path = BASE_DIR.parent / "data"/"y.npy"
 
+TEST_DIR = BASE_DIR.parent /"data"/ "test"
+X_test_path = TEST_DIR /"x.npy"
+y_test_path = TEST_DIR /"y.npy"
+
+TRAIN_DIR = BASE_DIR.parent /"data"/ "train"
+X_train_path = TRAIN_DIR /"x.npy"
+y_train_path = TRAIN_DIR /"y.npy"
+
+VALIDATION_DIR = BASE_DIR.parent /"data"/ "validation"
+X_val_path = VALIDATION_DIR /"x.npy"
+y_val_path = VALIDATION_DIR /"y.npy"
 
 
 #Default Value for input
+seed_default = 42
 frequency_default = 100
 lowcut_default = 2
 highcut_default = 49
+train_test_split_default = 0.2
+validation_test_split_default = 0.5
+sample_length_default = 6000
 
 
 
@@ -34,17 +48,38 @@ def BandPass_Filter_and_Normalization(X, fs=frequency_default, lowcut=lowcut_def
 def PreProcessing(dataset = dataBuilder(), save_dataset = True):
     N = len(dataset)
 
-    X = np.empty((N, 3, 6000), dtype=np.float32)
-    y = np.array(dataset.metadata["trace_category"])
+    X = np.empty((N, 3, sample_length_default), dtype=np.float32)
+    y_mark = np.array(dataset.metadata["trace_category"])
+    y = np.empty((N,), dtype=np.int32)
+
+    for i in range(N):
+        if y_mark[i] == "earthquake_local":
+            y[i] = 1
+        else:
+            y[i] = 0
+
 
     #random shuffle of the dataset
-    Xshuffled, ylabel = shuffle(X, y, random_state=42)
+    Xshuffled, ylabel = shuffle(X, y, random_state=seed_default)
 
     Xfiltered = BandPass_Filter_and_Normalization(Xshuffled)
 
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        Xfiltered, y, test_size=train_test_split_default, random_state=seed_default
+    )
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp, y_temp, test_size=validation_test_split_default, random_state=seed_default
+    )
+
     if save_dataset:
-        np.save(X_output_path, Xfiltered)
-        np.save(y_output_path, y)
+        np.save(X_test_path, X_test)
+        np.save(y_test_path, y_test)
+
+        np.save(X_train_path, X_train)
+        np.save(y_train_path, y_train)
+
+        np.save(X_val_path, X_val)
+        np.save(y_val_path, y_val)
 
 
     return Xfiltered, ylabel
@@ -54,4 +89,4 @@ def PreProcessing(dataset = dataBuilder(), save_dataset = True):
 
 if __name__ == '__main__':
     X,y = PreProcessing()
-    print(X.shape, y.shape)
+    print(y[16])

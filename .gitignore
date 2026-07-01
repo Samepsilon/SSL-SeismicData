@@ -3,3 +3,7 @@
 /.seisbench/STEAD/
 /.seisbench/extractedSTEAD/
 /data/
+*.pyc
+/Models/simCLR/
+/Models/
+/MLflow/
