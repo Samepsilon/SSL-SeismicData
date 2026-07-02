@@ -1,16 +1,14 @@
-# This is a sample Python script.
+import mlflow
+mlflow.set_tracking_uri("sqlite:///MLflow.db")
+mlflow.set_experiment("SSL_FineTuning_Model_Comparison")
 
-# Press Maj+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    # Print connection information
+    print(f"MLflow Tracking URI: {mlflow.get_tracking_uri()}")
+    print(f"Active Experiment: {mlflow.get_experiment_by_name('my-first-experiment')}")
+
+    # Test logging
+    with mlflow.start_run():
+        mlflow.log_param("test_param", "test_value")
+        print("✓ Successfully connected to MLflow!")

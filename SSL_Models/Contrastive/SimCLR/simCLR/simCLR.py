@@ -1,6 +1,7 @@
 
 import torch.nn as nn
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
+from config import CFG
 
 
 class SimCLR_Transformer(nn.Module):
@@ -15,10 +16,10 @@ class SimCLR_Transformer(nn.Module):
         else:
             n_channel, n_length = n_channel, n_length
         d_model = n_length
-        n_head = 2
-        n_hid = 512
+        n_head = CFG["n_head"]
+        n_hid = CFG["n_hid"]
         encoder_layers = TransformerEncoderLayer(d_model, n_head, n_hid, dropout=0.1, batch_first=True)
-        self.encoder = TransformerEncoder(encoder_layers, num_layers=2)
+        self.encoder = TransformerEncoder(encoder_layers, num_layers=CFG["n_layers"])
         self.n_features = n_channel*n_length
 
         self.projector = nn.Sequential(

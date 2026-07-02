@@ -6,4 +6,5 @@
 *.pyc
 /Models/simCLR/
 /Models/
-/MLflow/
+/MLflow.db
+SSL_PT_FT_MLflow.db
