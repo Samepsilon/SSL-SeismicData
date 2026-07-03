@@ -11,11 +11,11 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 input_path = BASE_DIR.parent / ".seisbench" / "STEAD"
 output_path = BASE_DIR.parent / ".seisbench" / "extractedSTEAD"
-sampling_rate_default = 100
+sampling_rate_default = 250
 component_order_default = "ZNE"
-n_samples_default = 5000
+n_samples_default = 3000
 seed_default = 42
-magnitude_default = 0.2
+magnitude_default = 2.5
 distance_default = 21
 
 def sample_indices(metadata: pd.DataFrame, trace_category: str, n: int, seed: int) -> pd.Index:
@@ -41,8 +41,22 @@ def build_subset_dataset(stead: sbd.STEAD, indices: pd.Index) -> sbd.STEAD:
     subset.filter(mask, inplace=True)
     return subset
 
-def save_subset_dataset():
-    pass
+def save_subset_dataset(existing_dataset,stead):
+    metadata_path = output_path / "metadata.csv"
+    waveforms_path = output_path / "waveforms.hdf5"
+
+    dataformat = stead.data_format
+
+    with sbd.WaveformDataWriter(metadata_path, waveforms_path) as writer:
+
+        writer.data_format = dataformat
+
+        for idx in range(len(existing_dataset)):
+            waveform = existing_dataset.get_waveforms(idx)
+            metadata_dict = existing_dataset.metadata.iloc[idx]
+            writer.add_trace(waveform, metadata_dict)
+
+
 
 def dataBuilder(
     n_samples = n_samples_default,
@@ -104,7 +118,9 @@ def dataBuilder(
     print(f"  Subset size: {len(subset)} traces")
 
     if save_dataset:
-        save_subset_dataset()
+        save_subset_dataset(subset,stead)
+
+    subset.metadata.to_csv(output_path / "metadata.csv", index=False)
 
     return subset
 

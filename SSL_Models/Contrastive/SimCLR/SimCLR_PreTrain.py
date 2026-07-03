@@ -28,7 +28,7 @@ import mlflow
 def train_one_epoch(cfg, loader, model, criterion, optimizer):
     model.train()
     losses = []
-    for step, (x_i, x_j, _) in enumerate(tqdm(loader, desc="SSL")):
+    for step, (x_i, x_j, _) in enumerate(tqdm(loader, desc="pretraining")):
         x_i = x_i.to(cfg["device"])
         x_j = x_j.to(cfg["device"])
 

@@ -2,7 +2,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MODELS_DIR = BASE_DIR.parent /"Models"/"simCLR"
-SSL = MODELS_DIR /"SSL"
+SSL = MODELS_DIR /"pretraining"
 FINETUNE = MODELS_DIR /"finetunemodel"
 
 
@@ -16,7 +16,7 @@ CFG = {
     "dataset":          "STEAD",          # name used to build file paths / module names
     "n_class":          2,
     "n_channel":        3,              # number of sensor channels
-    "n_length":         6000,            # timesteps per sample
+    "n_length":         15000,            # timesteps per sample
 
     #  pretraining
     "seed":             42,
@@ -36,7 +36,7 @@ CFG = {
     "logistic_batch_size": 128,
     "logistic_epochs":  60,
     "labelled_ratio":   0.1,            # fraction of labelled train data to use (e.g. 0.1 = 10 %)
-    "SSL":         True,
+    "pretraining":         True,
     "finetune_mode": "Full",
     "save_dir": FINETUNE
 }

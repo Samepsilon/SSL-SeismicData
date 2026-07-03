@@ -23,12 +23,12 @@ y_val_path = VALIDATION_DIR /"y.npy"
 
 #Default Value for input
 seed_default = 42
-frequency_default = 100
+frequency_default = 250
 lowcut_default = 2
-highcut_default = 49
+highcut_default = 60
 train_test_split_default = 0.2
 validation_test_split_default = 0.5
-sample_length_default = 6000
+sample_length_default = frequency_default * 60
 
 
 
@@ -65,10 +65,10 @@ def PreProcessing(dataset = dataBuilder(), save_dataset = True):
     Xfiltered = BandPass_Filter_and_Normalization(Xshuffled)
 
     X_train, X_temp, y_train, y_temp = train_test_split(
-        Xfiltered, y, test_size=train_test_split_default, random_state=seed_default
+        Xfiltered, y, test_size=train_test_split_default, random_state=seed_default, stratify=y
     )
     X_val, X_test, y_val, y_test = train_test_split(
-        X_temp, y_temp, test_size=validation_test_split_default, random_state=seed_default
+        X_temp, y_temp, test_size=validation_test_split_default, random_state=seed_default, stratify=y_temp
     )
 
     if save_dataset:
