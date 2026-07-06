@@ -1,0 +1,19 @@
+SSL_PreTraining_Model_Comparison = First test, and verification of MLFLOW
+    1_PreTraining_SimCLR
+SSL_FineTuning_Model_Comparison = First test, and verification of MLFLOW
+    1_FineTuning_Dummy
+
+#to test if the Model have an impact
+SSL_Pretraining_SimCLR_Label_Ratio_Importance
+    1_PreTraining_SimCLR
+SSL_Finetuning_Label_Ratio_Importance
+    1_FineTuning_Dummy_WPretraining_0.01
+    1_FineTuning_Dummy_WPretraining_0.1
+    1_FineTuning_Dummy_WPretraining_0.3
+    1_FineTuning_Dummy_WPretraining_0.5
+    1_FineTuning_Dummy_WPretraining_1.0
+    1_FineTuning_Dummy_0.01
+    1_FineTuning_Dummy_0.1
+    1_FineTuning_Dummy_0.3
+    1_FineTuning_Dummy_0.5
+    1_FineTuning_Dummy_1.0

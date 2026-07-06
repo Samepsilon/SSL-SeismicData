@@ -59,7 +59,7 @@ def main():
     train_x, train_y = train_set()
     train_dataset = CustomTensorDataset(
         data=(train_x, train_y),
-        transform_A=Jittering(0, 0.1),
+        transform_A=Jittering(0, CFG["jittering_std"]),
         # transform_A=Scaling(),
         # transform_B=Flipping(),
     )
@@ -106,7 +106,7 @@ def main():
 def mainWmlflow():
 
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
-    mlflow.set_experiment("SSL_PreTraining_Model_Comparison")
+    mlflow.set_experiment("SSL_Pretraining_SimCLR_Label_Ratio_Importance")
     # Start MLflow run for Pre-training
     with mlflow.start_run(run_name="1_PreTraining_SimCLR"):
 

@@ -11,9 +11,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 input_path = BASE_DIR.parent / ".seisbench" / "STEAD"
 output_path = BASE_DIR.parent / ".seisbench" / "extractedSTEAD"
-sampling_rate_default = 250
+sampling_rate_default = 100
 component_order_default = "ZNE"
-n_samples_default = 3000
+n_samples_default = 4000
 seed_default = 42
 magnitude_default = 2.5
 distance_default = 21

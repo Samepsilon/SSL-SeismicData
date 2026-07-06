@@ -23,9 +23,9 @@ y_val_path = VALIDATION_DIR /"y.npy"
 
 #Default Value for input
 seed_default = 42
-frequency_default = 250
+frequency_default = 100
 lowcut_default = 2
-highcut_default = 60
+highcut_default = 49
 train_test_split_default = 0.2
 validation_test_split_default = 0.5
 sample_length_default = frequency_default * 60
@@ -89,4 +89,3 @@ def PreProcessing(dataset = dataBuilder(), save_dataset = True):
 
 if __name__ == '__main__':
     X,y = PreProcessing()
-    print(y[16])

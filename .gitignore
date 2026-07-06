@@ -9,3 +9,4 @@
 /MLflow.db
 SSL_PT_FT_MLflow.db
 /Exploratory_Data_Analysis/PLOTS_EDA/
+*.pyc

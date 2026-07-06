@@ -75,7 +75,7 @@ def _mean_metrics(records: list[dict]) -> dict:
     return {k: sum(r[k] for r in records) / len(records) for k in keys}
 
 
-def finetune_epoch(cfg, loader, encoder, classifier, criterion, optimizer, mode="Full"):
+def finetune_epoch(cfg, loader, encoder, classifier, criterion, optimizer):
     encoder.train()
     classifier.train()
 
@@ -88,7 +88,7 @@ def finetune_epoch(cfg, loader, encoder, classifier, criterion, optimizer, mode=
         x = x.to(cfg["device"])
         y = y.squeeze(-1).long().to(cfg["device"])
 
-        if mode == "Full":
+        if CFG["pretraining"]:
             h, _, _, _ = encoder(x, x)
         else:
             with torch.no_grad():
@@ -242,7 +242,7 @@ def main():
 def mainWmlflow():
 
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
-    mlflow.set_experiment("SSL_FineTuning_Model_Comparison")
+    mlflow.set_experiment("SSL_Finetuning_Label_Ratio_Importance")
     if mlflow.active_run():
         mlflow.end_run()
 
@@ -321,9 +321,7 @@ def mainWmlflow():
         encoder = encoder.to(device)
         classifier = MLP_Classifier(encoder.n_features, CFG["n_class"]).to(device)
 
-        finetune_mode = CFG["finetune_mode"]
-
-        if finetune_mode == "Full":
+        if CFG["pretraining"]:
             optimizer = torch.optim.AdamW(
                 list(encoder.parameters()) + list(classifier.parameters()), lr=3e-4
             )
@@ -341,7 +339,7 @@ def mainWmlflow():
 
         for epoch in range(CFG["logistic_epochs"]):
             train_loss, train_m = finetune_epoch(
-                CFG, train_loader, encoder, classifier, criterion, optimizer, finetune_mode
+                CFG, train_loader, encoder, classifier, criterion, optimizer
             )
             val_loss, val_m = eval_epoch(CFG, val_loader, encoder, classifier, criterion)
 
