@@ -9,7 +9,7 @@ FINETUNE = MODELS_DIR /"finetunemodel"
 CFG = {
     # simCLR config
     "n_layers" : 4,
-    "n_hid"    : 1024,
+    "n_hid"    : 512,
     "n_head"   : 4,   # must divide n_length evenly
 
     #  dataset
@@ -20,22 +20,24 @@ CFG = {
 
     #  pretraining
     "seed":             42,
-    "batch_size":       128,
+    "batch_size":       256,
     "epochs":           50,
     "optimizer":        "AdamW",        # "Adam" or "AdamW"
-    "lr":               1e-4,
+    "lr":               3e-4,
     "weight_decay":     1e-4,
     "warmup_epoch":     10,
     "temperature":      0.2,
     "projection_dim":   256,
     "model_path":       SSL,
     "jittering_std" : 0.3,
+    "scaling-sigma" : 0.3,
 
     #  fine-tuning
     "finetune_seed":    42,
     "logistic_batch_size": 128,
     "logistic_epochs":  60,
     "labelled_ratio":   0.1,            # fraction of labelled train data to use (e.g. 0.1 = 10 %)
-    "pretraining":         True,
+    "pretraining":      True,
+    "full_finetune":    True,
     "save_dir": FINETUNE
 }
