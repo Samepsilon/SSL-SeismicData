@@ -5,6 +5,7 @@ SimCLR_pretrain.py  —  self-supervised pretraining loop.
 import time
 import numpy as np
 import torch
+import torch.nn.functional as F
 from tqdm import tqdm
 import os
 
@@ -32,7 +33,7 @@ def train_one_epoch(cfg, loader, model, criterion, optimizer):
         x_i = x_i.to(cfg["device"])
         x_j = x_j.to(cfg["device"])
 
-        _, _, z_i, z_j = model(x_i, x_j)
+        h_i, _, z_i, z_j = model(x_i, x_j)
         loss = criterion(z_i, z_j)
 
         optimizer.zero_grad()
@@ -43,10 +44,76 @@ def train_one_epoch(cfg, loader, model, criterion, optimizer):
             print(f"  step [{step}/{len(loader)}]  loss {loss.item():.4f}")
 
         losses.append(loss.item())
+    check_collapse(h_i.detach())
+
+
 
     return sum(losses) / len(losses)
 
+def check_collapse(h: torch.Tensor, label: str = "encoder output") -> dict:
+    """
+    Checks whether the encoder has collapsed by measuring the variance
+    of its output representations.
 
+    A collapsed model produces near-identical embeddings for all inputs,
+    meaning variance → 0 and all features become constant.
+
+    Args:
+        h     : encoder output [batch, n_features]
+        label : string printed in the report (e.g. "epoch 5 / pretrain")
+
+    Returns:
+        dict of scalar metrics — also prints a human-readable report.
+    """
+    with torch.no_grad():
+        # variance per feature dimension, averaged across the batch
+        # shape: [n_features] → scalar
+        per_feature_var  = h.var(dim=0)             # variance across samples
+        mean_var         = per_feature_var.mean().item()
+        min_var          = per_feature_var.min().item()
+        dead_dims        = (per_feature_var < 1e-6).sum().item()
+        total_dims       = h.shape[1]
+        dead_pct         = 100 * dead_dims / total_dims
+
+        # std of the per-feature variances — high std means some dims are
+        # active, others dead (partial collapse)
+        std_of_var       = per_feature_var.std().item()
+
+        # cosine similarity between all pairs in the batch — collapse means
+        # all pairs → 1.0
+        h_norm           = F.normalize(h, dim=1)
+        cos_sim_matrix   = h_norm @ h_norm.T
+        # exclude diagonal (self-similarity = 1 always)
+        mask             = ~torch.eye(h.shape[0], dtype=torch.bool, device=h.device)
+        mean_cos_sim     = cos_sim_matrix[mask].mean().item()
+
+        # collapse verdict
+        if mean_var < 1e-4 or dead_pct > 90:
+            status = "🔴 COLLAPSED — all embeddings are identical"
+        elif dead_pct > 50 or mean_cos_sim > 0.95:
+            status = "🟠 PARTIAL COLLAPSE — many dead dimensions"
+        elif mean_var < 0.01 or mean_cos_sim > 0.85:
+            status = "🟡 WARNING — low variance, monitor closely"
+        else:
+            status = "🟢 OK — representations look diverse"
+
+        print(f"\n── Collapse check [{label}] ──────────────────────")
+        print(f"  status           : {status}")
+        print(f"  mean feature var : {mean_var:.6f}   (want >> 0)")
+        print(f"  min feature var  : {min_var:.6f}   (want >> 0)")
+        print(f"  dead dims        : {dead_dims}/{total_dims} ({dead_pct:.1f}%)  (want ~0%)")
+        print(f"  std of var       : {std_of_var:.6f}  (very high = uneven dims)")
+        print(f"  mean cosine sim  : {mean_cos_sim:.4f}    (want << 1.0)")
+        print(f"────────────────────────────────────────────────────\n")
+
+        return {
+            "mean_var":      mean_var,
+            "min_var":       min_var,
+            "dead_dims":     dead_dims,
+            "dead_pct":      dead_pct,
+            "std_of_var":    std_of_var,
+            "mean_cos_sim":  mean_cos_sim,
+        }
 
 def mainWmlflow():
 

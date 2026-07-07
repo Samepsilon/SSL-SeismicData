@@ -29,6 +29,7 @@ highcut_default = 49
 train_test_split_default = 0.2
 validation_test_split_default = 0.5
 sample_length_default = frequency_default * 60
+desired_sample_length_default = 2000
 
 
 
