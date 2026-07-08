@@ -16,7 +16,7 @@ CFG = {
     "dataset":          "STEAD",          # name used to build file paths / module names
     "n_class":          2,
     "n_channel":        3,              # number of sensor channels
-    "n_length":         6000,            # timesteps per sample
+    "n_length":         2000,            # timesteps per sample
 
     #  pretraining
     "seed":             42,
@@ -29,15 +29,20 @@ CFG = {
     "temperature":      0.2,
     "projection_dim":   256,
     "model_path":       SSL,
-    "jittering_std" : 0.3,
-    "scaling-sigma" : 0.3,
+    "early_stopping_patience": 5,
+
+    #custom augmenter parameter
+    "n_speed_change": 4,
+    "max_speed_ratio": 2.0,
+    "noise_scale": 0.01,
+    "probaility_for_dropout": 0.1,
 
     #  fine-tuning
     "finetune_seed":    42,
     "logistic_batch_size": 128,
     "logistic_epochs":  60,
     "labelled_ratio":   0.1,            # fraction of labelled train data to use (e.g. 0.1 = 10 %)
-    "pretraining":      True,
+    "pretraining":      False,
     "full_finetune":    True,
     "save_dir": FINETUNE
 }

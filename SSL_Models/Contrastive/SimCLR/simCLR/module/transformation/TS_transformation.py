@@ -1,5 +1,5 @@
 import numpy as np
-
+import tsaug
 
 class Jittering:
     def __init__(self, mean=0., std=1.):
@@ -31,5 +31,21 @@ class Flipping:
 
     def __call__(self, x):
         return np.flip(x, axis=self.axis).copy()
+
+class CustomAugmentation:
+    def __init__(self, n_speed_change,max_speed_ratio,scale ,p ):
+        self.n_speed_change = n_speed_change
+        self.max_speed_ratio = max_speed_ratio
+        self.scale = scale
+        self.p = p
+
+        self.custom_augmenter = (tsaug.TimeWarp(n_speed_change=6, max_speed_ratio=3)
+                            + tsaug.AddNoise(scale=0.01)
+                            + tsaug.Dropout(p=0.1, size=(5, 20), fill=float(0))
+                            )
+
+    def __call__(self, x):
+        x_aug = self.custom_augmenter.augment(x)
+        return x_aug
 
 

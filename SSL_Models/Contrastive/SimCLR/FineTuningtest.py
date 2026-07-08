@@ -88,7 +88,7 @@ def finetune_epoch(cfg, loader, encoder, classifier, criterion, optimizer):
         x = x.to(cfg["device"])
         y = y.squeeze(-1).long().to(cfg["device"])
 
-        if CFG["fullfinetune"]:
+        if CFG["full_finetune"]:
             h, _, _, _ = encoder(x, x)
         else:
             with torch.no_grad():
@@ -140,7 +140,7 @@ def mainWmlflow():
         mlflow.end_run()
 
     # Start MLflow run for Fine-tuning
-    with mlflow.start_run(run_name="1_FineTuning_Dummy"):
+    with mlflow.start_run(run_name="1_Test_w_DummyClassifier"):
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         CFG["device"] = device
@@ -159,7 +159,7 @@ def mainWmlflow():
             "val_size": len(val_X),
             "test_size": len(test_X),
             "labelled_ratio": labelled_ratio,
-            "finetune_mode": CFG["finetune_mode"],
+            "full_finetune": CFG["full_finetune"],
             "logistic_epochs": CFG["logistic_epochs"],
             "logistic_batch_size": CFG["logistic_batch_size"]
         })
@@ -210,7 +210,7 @@ def mainWmlflow():
             )
             encoder.load_state_dict(torch.load(ckpt, map_location=device))
             print(f"Loaded pretrained weights from {ckpt}")
-            arch = CFG["dataset"]
+        arch = CFG["dataset"]
 
         encoder = encoder.to(device)
         classifier = MLP_Classifier(encoder.n_features, CFG["n_class"]).to(device)
