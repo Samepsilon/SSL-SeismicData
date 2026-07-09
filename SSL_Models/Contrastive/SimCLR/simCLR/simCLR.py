@@ -1,7 +1,6 @@
-
 import torch.nn as nn
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
-from config import CFG
+from Config.SimCLR_config import CFG
 
 
 class SimCLR_Transformer(nn.Module):
@@ -10,7 +9,6 @@ class SimCLR_Transformer(nn.Module):
         super(SimCLR_Transformer, self).__init__()
 
         """Build your own encoder, replace it by untrained Transformer"""
-        # input data shape: [128, 2,240]
         if aug_mode == 'channel_wise':
             n_channel, n_length = 1, n_length
         else:

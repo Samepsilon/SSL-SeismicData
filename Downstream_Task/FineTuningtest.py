@@ -21,7 +21,8 @@ from sklearn.metrics import (
 )
 from tqdm import tqdm
 
-from config import CFG
+from Config.SimCLR_config import CFG
+from Config.dataset_config import extractedSTEAD
 from simCLR.simCLR import SimCLR_Transformer
 from build_dataset import CustomTensorDataset
 from Dataset_STEAD import train_set, test_set, validation_set

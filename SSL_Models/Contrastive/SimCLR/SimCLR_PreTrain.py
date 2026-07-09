@@ -1,7 +1,3 @@
-"""
-SimCLR_pretrain.py  —  self-supervised pretraining loop.
-"""
-
 import time
 import numpy as np
 import torch
@@ -10,10 +6,12 @@ from tqdm import tqdm
 import os
 
 #function from other file
-from config import CFG
-from model import load_optimizer, save_model
+from Config.SimCLR_config import CFG
+from Config.dataset_config import extractedSTEAD
+from model import load_optimizer
+from SSL_Models.utility.save_model import save_model
 from build_dataset import CustomTensorDataset
-from Dataset_STEAD import train_set
+from SSL_Models.utility.Dataset.Dataset_STEAD import train_set
 
 #module
 from simCLR.simCLR import SimCLR_Transformer
@@ -26,12 +24,12 @@ import mlflow
 
 
 
-def train_one_epoch(cfg, loader, model, criterion, optimizer):
+def train_one_epoch(device, loader, model, criterion, optimizer):
     model.train()
     losses = []
     for step, (x_i, x_j, _) in enumerate(tqdm(loader, desc="pretraining")):
-        x_i = x_i.to(cfg["device"])
-        x_j = x_j.to(cfg["device"])
+        x_i = x_i.to(device)
+        x_j = x_j.to(device)
 
         _, _, z_i, z_j = model(x_i, x_j)
         loss = criterion(z_i, z_j)
@@ -63,14 +61,13 @@ def mainWmlflow():
         np.random.seed(CFG["seed"])
 
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        CFG["device"] = device
         print(f"Using device: {device}")
 
         # --- data ---
         train_x, train_y = train_set()
 
         # Log Dataset Size & Parameters manually
-        mlflow.log_params({"pretrain_dataset_size": len(train_y),"dataset_size": CFG["n_length"],"ratio":(len(train_y)/CFG["n_length"])})
+        mlflow.log_params({"pretrain_dataset_size": len(train_y),"dataset_size": extractedSTEAD["n_length"],"ratio":(len(train_y)/extractedSTEAD["n_length"])})
         mlflow.log_params({
             "seed": CFG["seed"],
             "batch_size": CFG["batch_size"],
@@ -100,8 +97,8 @@ def mainWmlflow():
         # --- model ---
         model = SimCLR_Transformer(
             projection_dim=CFG["projection_dim"],
-            n_channel=CFG["n_channel"],
-            n_length=CFG["n_length"],
+            n_channel=extractedSTEAD["n_channel"],
+            n_length=extractedSTEAD["n_length"],
         ).to(device)
 
         mlflow.log_params({
@@ -121,7 +118,7 @@ def mainWmlflow():
             t0 = time.time()
             lr = optimizer.param_groups[0]["lr"]
 
-            mean_loss = train_one_epoch(CFG, train_loader, model, criterion, optimizer)
+            mean_loss = train_one_epoch(device, train_loader, model, criterion, optimizer)
             scheduler.step()
 
             # Log Epoch metrics to MLflow
@@ -132,7 +129,7 @@ def mainWmlflow():
 
             if mean_loss < lowest_loss:
                 print(f"  ↓ loss improved {lowest_loss:.4f} → {mean_loss:.4f}  — saving model")
-                save_model(CFG, model)
+                save_model(model,"simCLR",extractedSTEAD["name"],CFG["n_layers"],CFG["n_hid"])
                 lowest_loss = mean_loss
                 early_stop_counter = 0
 

@@ -7,6 +7,7 @@ SSL_FineTuning_Model_Comparison = First test, and verification of MLFLOW
 SSL_Pretraining_SimCLR_Label_Ratio_Importance
     1_PreTraining_SimCLR
 SSL_Finetuning_Label_Ratio_Importance
+
     1_FineTuning_Dummy_WPretraining_0.01
     1_FineTuning_Dummy_WPretraining_0.1
     1_FineTuning_Dummy_WPretraining_0.3

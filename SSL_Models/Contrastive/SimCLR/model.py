@@ -38,14 +38,3 @@ def load_optimizer(cfg: dict, model: torch.nn.Module):
 
     return optimizer, scheduler
 
-
-def save_model(cfg: dict, model: torch.nn.Module):
-    """Save encoder weights to cfg["model_path"]."""
-    os.makedirs(cfg["model_path"], exist_ok=True)
-    out = os.path.join(
-        cfg["model_path"],
-        f"Pretrained_{cfg['dataset']}_{cfg['lr']}_{cfg['projection_dim']}.tar",
-    )
-    state = model.module.state_dict() if isinstance(model, torch.nn.DataParallel) else model.state_dict()
-    torch.save(state, out)
-    print(f"Model saved → {out}")
