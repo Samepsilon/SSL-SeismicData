@@ -1,4 +1,4 @@
-CFG = {
+simCLR = {
     # simCLR config
     "n_layers" : 8,
     "n_hid"    : 1024,

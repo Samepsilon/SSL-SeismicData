@@ -46,7 +46,7 @@ CKPT_PATH   = os.path.join(
 )
 BATCH_SIZE  = 128                # for encoder inference — reduce if OOM
 N_CLASS     = CFG["n_class"]     # 2 for your seismic dataset
-SAVE_DIR    = "../SSL_Models/Contrastive/SimCLR/plots_results"
+SAVE_DIR    = "../Pretraining_Model/Contrastive/SimCLR/plots_results"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 

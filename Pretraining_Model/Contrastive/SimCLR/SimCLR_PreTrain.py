@@ -6,12 +6,12 @@ from tqdm import tqdm
 import os
 
 #function from other file
-from Config.SimCLR_config import CFG
+from Config.Pretraining_Models_Config import CFG
 from Config.dataset_config import extractedSTEAD
 from model import load_optimizer
-from SSL_Models.utility.save_model import save_model
+from Pretraining_Model.utility.save_model import save_model
 from build_dataset import CustomTensorDataset
-from SSL_Models.utility.Dataset.Dataset_STEAD import train_set
+from Pretraining_Model.utility.Dataset.Dataset_STEAD import train_set
 
 #module
 from simCLR.simCLR import SimCLR_Transformer
@@ -129,7 +129,7 @@ def mainWmlflow():
 
             if mean_loss < lowest_loss:
                 print(f"  ↓ loss improved {lowest_loss:.4f} → {mean_loss:.4f}  — saving model")
-                save_model(model,"simCLR",extractedSTEAD["name"],CFG["n_layers"],CFG["n_hid"])
+                save_model(model,"simCLR",extractedSTEAD["name"],CFG["n_layers"],CFG["projection_dim"])
                 lowest_loss = mean_loss
                 early_stop_counter = 0
 

@@ -1,6 +1,6 @@
 import torch.nn as nn
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
-from Config.SimCLR_config import CFG
+from Config.Pretraining_Models_Config import CFG
 
 
 class SimCLR_Transformer(nn.Module):
