@@ -14,6 +14,8 @@ All paths and hyperparameters are set in the CONFIG block below.
 """
 
 import os
+from pathlib import Path
+
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -32,21 +34,20 @@ from sklearn.metrics import (
 from sklearn.preprocessing import StandardScaler
 from scipy.optimize import linear_sum_assignment
 
-from config import CFG
+from Config.dataset_config import extractedSTEAD
 from simCLR.simCLR  import SimCLR_Transformer
-from Dataset_STEAD import test_set, train_set
+from utility.Dataset.Dataset_STEAD import test_set
 
 from sklearn.manifold import TSNE
 
+from utility.encoder_loader import encoder_loader_path
+
 # CONFIG — edit these to point at your data and model checkpoint
 
-CKPT_PATH   = os.path.join(
-    CFG["model_path"],
-    f"Pretrained_{CFG['dataset']}_{CFG['lr']}_{CFG['projection_dim']}.tar"
-)
-BATCH_SIZE  = 128                # for encoder inference — reduce if OOM
-N_CLASS     = CFG["n_class"]     # 2 for your seismic dataset
-SAVE_DIR    = "../Pretraining_Model/Contrastive/SimCLR/plots_results"
+
+BATCH_SIZE  = 128
+N_CLASS     = extractedSTEAD["n_class"]     # 2 for your seismic dataset
+SAVE_DIR    = "plots_results"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 
@@ -88,11 +89,18 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
+    CKPT_PATH = encoder_loader_path()
+    projection_dim = int(Path(CKPT_PATH).stem.split('_')[-1])
+    print(projection_dim)
+
     encoder = SimCLR_Transformer(
-        projection_dim=CFG["projection_dim"],
-        n_channel=CFG["n_channel"],
-        n_length=CFG["n_length"],
+        projection_dim=projection_dim,
+        n_channel=extractedSTEAD["n_channel"],
+        n_length=extractedSTEAD["n_length"],
     )
+
+
+
     encoder.load_state_dict(torch.load(CKPT_PATH, map_location=device))
     encoder = encoder.to(device)
     print(f"Loaded checkpoint: {CKPT_PATH}")

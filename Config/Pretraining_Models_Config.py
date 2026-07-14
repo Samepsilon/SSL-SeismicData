@@ -2,7 +2,7 @@ simCLR = {
     # simCLR config
     "n_layers" : 8,
     "n_hid"    : 1024,
-    "n_head"   : 8,   # must divide sample evenly
+    "n_head"   : 8,   # must divide the number of sample evenly
 
     #  pretraining
     "seed":             42,
@@ -20,5 +20,5 @@ simCLR = {
     "n_speed_change": 4,
     "max_speed_ratio": 2.0,
     "noise_scale": 0.01,
-    "probaility_for_dropout": 0.1,
+    "probability_for_dropout": 0.1,
 }

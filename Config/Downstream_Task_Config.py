@@ -13,7 +13,7 @@ ANN = {
     "learning_rate": 3e-4,
     "labelled_ratio": 0.1,  # fraction of labelled train data to use (e.g. 0.1 = 10 %)
     "full_finetune" : True,
-    "pretrained": True,
+    "pretrained": False,
     "SAVE_DIR" : SAVE_DIR / "ANN"
 }
 

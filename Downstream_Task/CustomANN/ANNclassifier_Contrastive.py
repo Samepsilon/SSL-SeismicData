@@ -31,12 +31,12 @@ warnings.filterwarnings("ignore")
 
 def mainWmlflow():
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
-    mlflow.set_experiment("SSL_Finetuning_Label_Ratio_Importance")
+    mlflow.set_experiment("SSL_FineTuning_Model_Comparison")
     if mlflow.active_run():
         mlflow.end_run()
 
     # Start MLflow run for Fine-tuning
-    with mlflow.start_run(run_name="1_Test_w_DummyClassifier"):
+    with mlflow.start_run(run_name="1_Test_w_ANN"):
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {device}")
@@ -59,7 +59,6 @@ def mainWmlflow():
             "logistic_batch_size": ANN["logistic_batch_size"]
         })
 
-        # --- build a balanced, label-ratio-constrained training set ---
         fea, lab = [], []
         for i in range(extractedSTEAD["n_class"]):
             mask = train_Y == i
@@ -86,6 +85,8 @@ def mainWmlflow():
                 shuffle=shuffle,
                 drop_last=True,
             )
+
+        projection_dim = 256 #default value
 
         train_loader = make_loader(train_x, train_y)
         val_loader = make_loader(val_X, val_Y, shuffle=False)
