@@ -7,8 +7,11 @@ To Tune the performance of the models to better compute the dataset
 SSL_Pretraining_SimCLR_Performance_Tuning
     Baseline_Run
     Tuning_Run
+
+SSL_Finetuning_Cluster_Tuning_Evaluation
+    Evaluation_Run_Model_1 #
     
-SSL_Finetuning_ANN_Label_Performance_Tuning
+SSL_Finetuning_ANN_Performance_Tuning
     Baseline_Run
     Tuning_Run
 
@@ -18,12 +21,10 @@ SSL_Pretraining_Label_Ratio_Importance
     1_PreTraining_MAE
 
 SSL_Finetuning_Label_Ratio_Importance
-    1_FineTuning_ANN_WPretraining_0.01
-    1_FineTuning_ANN_WPretraining_0.1
-    1_FineTuning_ANN_WPretraining_0.3
-    1_FineTuning_ANN_WPretraining_0.5
-    1_FineTuning_ANN_WPretraining_1.0
-    1_FineTuning_ANN_0.01
+    1_FineTuning_ANN_SimCLR_Pretraining_0.1
+    1_FineTuning_ANN_SimCLR_Pretraining_0.3
+    1_FineTuning_ANN_SimCLR_Pretraining_0.5
+    1_FineTuning_ANN_SimCLR_Pretraining_1.0
     1_FineTuning_ANN_0.1
     1_FineTuning_ANN_0.3
     1_FineTuning_ANN_0.5

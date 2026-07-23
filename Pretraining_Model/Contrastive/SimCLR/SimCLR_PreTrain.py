@@ -9,8 +9,8 @@ import os
 from Config.Pretraining_Models_Config import simCLR
 from Config.dataset_config import extractedSTEAD
 from model import load_optimizer
-from Pretraining_Model.utility.save_model import save_model
-from build_dataset import CustomTensorDataset
+from save_model_simCLR import save_model
+from SimCLR.build_dataset import CustomTensorDataset
 from Pretraining_Model.utility.Dataset.Dataset_STEAD import train_set
 
 #module
@@ -52,10 +52,10 @@ def train_one_epoch(device, loader, model, criterion, optimizer):
 def mainWmlflow():
 
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
-    mlflow.set_experiment("SSL_Pretraining_SimCLR_Performance_Tuning")
+    mlflow.set_experiment("SSL_Pretraining_SimCLR_6*512_Tuning")
     early_stop_counter = 0
     # Start MLflow run for Pre-training
-    with mlflow.start_run(run_name="Tuning_Run"):
+    with mlflow.start_run(run_name="Baseline"):
 
         torch.manual_seed(simCLR["seed"])
         np.random.seed(simCLR["seed"])
@@ -67,7 +67,6 @@ def mainWmlflow():
         train_x, train_y = train_set()
 
         # Log Dataset Size & Parameters manually
-        mlflow.log_params({"pretrain_dataset_size": len(train_y),"dataset_size": extractedSTEAD["n_length"],"ratio":(len(train_y)/extractedSTEAD["n_length"])})
         mlflow.log_params({
             "seed": simCLR["seed"],
             "batch_size": simCLR["batch_size"],
@@ -106,6 +105,9 @@ def mainWmlflow():
             projection_dim=simCLR["projection_dim"],
             n_channel=extractedSTEAD["n_channel"],
             n_length=extractedSTEAD["n_length"],
+            n_layers=simCLR["n_layers"],
+            n_hid= simCLR["n_hid"],
+            n_head=simCLR["n_head"],
         ).to(device)
 
         mlflow.log_params({
@@ -136,7 +138,7 @@ def mainWmlflow():
 
             if mean_loss < lowest_loss:
                 print(f"  ↓ loss improved {lowest_loss:.4f} → {mean_loss:.4f}  — saving model")
-                save_model(model,"simCLR",extractedSTEAD["name"],simCLR["n_layers"],simCLR["projection_dim"])
+                save_model(model,"simCLR",extractedSTEAD["name"],simCLR["n_layers"],simCLR["n_hid"],simCLR["n_head"],simCLR["projection_dim"])
                 lowest_loss = mean_loss
                 early_stop_counter = 0
 
@@ -152,7 +154,6 @@ def mainWmlflow():
                     break
                 else:
                     early_stop_counter += 1
-
 
         # Log the final best loss
         mlflow.log_metric("best_pretrain_loss", lowest_loss)

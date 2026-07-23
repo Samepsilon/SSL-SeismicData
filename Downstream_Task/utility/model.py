@@ -14,12 +14,7 @@ from sklearn.metrics import (
 from tqdm import tqdm
 
 from Config.Downstream_Task_Config import ANN
-from Config.Pretraining_Models_Config import simCLR
 from Config.dataset_config import extractedSTEAD
-
-from simCLR.simCLR import SimCLR_Transformer
-from utility.build_dataset import CustomTensorDataset
-from utility.Dataset.Dataset_STEAD import train_set, test_set, validation_set
 
 def setup_seed(seed: int = 42):
     torch.manual_seed(seed)
@@ -75,17 +70,18 @@ def finetune_epoch(device, loader, encoder, classifier, criterion, optimizer):
         x = x.to(device)
         y = y.squeeze(-1).long().to(device)
 
-        if ANN["full_finetune"]:
-            h, _, _, _ = encoder(x, x)
-        else:
-            with torch.no_grad():
-                h, _, _, _ = encoder(x, x)
+        h, _, _, _ = encoder(x, x)
 
         logits = classifier(h)
         loss = criterion(logits, y)
 
         optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(
+            list(encoder.parameters()) + list(classifier.parameters()),
+            max_norm=1.0
+        )
+
         optimizer.step()
 
         losses.append(loss.item())

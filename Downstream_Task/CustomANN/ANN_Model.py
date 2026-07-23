@@ -30,8 +30,14 @@ class CustomANN(nn.Module):
             nn.ReLU(),
             nn.Dropout(0.2),
 
+            # 4 Hidden Layer
+            nn.Linear(ANN["hidden_layer_layout"][2], ANN["hidden_layer_layout"][3]),
+            nn.BatchNorm1d(ANN["hidden_layer_layout"][3]),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+
             # Output Layer
-            nn.Linear(ANN["hidden_layer_layout"][2], num_classes)
+            nn.Linear(ANN["hidden_layer_layout"][3], num_classes)
         )
 
     def forward(self, x):
