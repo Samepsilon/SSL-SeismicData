@@ -86,7 +86,7 @@ def extract_embeddings(model, X: np.ndarray, device, batch_size: int) -> np.ndar
 def main():
     # Start MLflow Run
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
-    mlflow.set_experiment("SSL_Pretraining_SimCLR_6*512_Clustering")
+    mlflow.set_experiment("SSL_Pretraining_SimCLR_Clustering_v2")
 
     with mlflow.start_run(run_name="Baseline"):
         # Load data

@@ -103,9 +103,9 @@ def main():
 
 def mainWmlflow():
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
-    mlflow.set_experiment("SSL_Pretraining_MAE_6*512_Tuning")
+    mlflow.set_experiment("SSL_Pretraining_Tuning_v2")
 
-    with mlflow.start_run(run_name="Baseline_20_0.07 "):
+    with mlflow.start_run(run_name="Baseline_100_0.75 "):
 
         mlflow.log_params({
             "seed": MAE["seed"],

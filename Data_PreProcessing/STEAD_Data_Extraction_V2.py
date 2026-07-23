@@ -99,8 +99,12 @@ def dataBuilder():
     X_Norm = np.empty_like(X, dtype=np.float32)
     for i in range(X.shape[0]):
         for ch in range(X.shape[1]):
-            max_abs  = np.max(np.abs(X[i, ch, :]))
-            X_Norm[i, ch, :] = X[i, ch, :] / max_abs if max_abs > 0 else X[i, ch, :]
+            # Z-score standardization per sequence, per channel
+            mean_val = np.mean(X[i, ch, :])
+            std_val = np.std(X[i, ch, :])
+
+            # Add a small epsilon (1e-6) to prevent division by zero on dead channels
+            X_Norm[i, ch, :] = (X[i, ch, :] - mean_val) / (std_val + 1e-6)
 
 
 

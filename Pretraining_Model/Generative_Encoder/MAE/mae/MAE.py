@@ -35,7 +35,6 @@ class PatchShuffle(torch.nn.Module):
 
         return patches, forward_indexes, backward_indexes
 
-
 class MAE_Encoder(torch.nn.Module):
     def __init__(self,
                  sample_size=[3, 2000],

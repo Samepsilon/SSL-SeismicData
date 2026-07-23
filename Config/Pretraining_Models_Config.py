@@ -1,17 +1,17 @@
 simCLR = {
     # simCLR config
-    "n_layers" : 6,
+    "n_layers" : 8,
     "n_hid"    : 512,
     "n_head"   : 16,   # must divide the number of sample evenly
 
     #  pretraining
     "seed":             42,
     "batch_size":       512,
-    "epochs":           50,
+    "epochs":           200,
     "optimizer":        "AdamW",        # "Adam" or "AdamW"
     "lr":               3e-4,
     "weight_decay":     1e-4,
-    "warmup_epoch":     5,
+    "warmup_epoch":     25,
     "temperature":      0.2,
     "projection_dim":   512,
     "early_stopping_patience": 5,
@@ -24,21 +24,21 @@ simCLR = {
 }
 
 MAE = {
-    #simCLR Config
+    #MAE Config
     "emb_dim":512,
-    "encoder_layer":8,
-    "attention_head": 16,
-    "decoder_layer":2,
+    "encoder_layer":16,
+    "attention_head": 8,
+    "decoder_layer":4,
 
 
     #  pretraining
     "seed" : 42,
     "batch_size" : 512,
-    "patch_size" : 20,
+    "patch_size" : 100,
     "max_device_batch_size" : 512,
-    "base_learning_rate" : 3e-4,
-    "weight_decay": 0.05,
-    "mask_ratio": 0.1,
-    "total_epoch": 50,
-    "warmup_epoch": 5,
+    "base_learning_rate" : 2e-4,
+    "weight_decay": 1e-4,
+    "mask_ratio": 0.75,
+    "total_epoch": 200,
+    "warmup_epoch": 25,
 }

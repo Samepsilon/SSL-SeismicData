@@ -91,7 +91,7 @@ def extract_embeddings(classifier, X: np.ndarray, device, batch_size: int) -> np
 def main():
     # Start MLflow Run
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
-    mlflow.set_experiment("SSL_Pretraining_MAE_6*512_Clustering")
+    mlflow.set_experiment("SSL_Pretraining_MAE_Clustering_v2")
 
     with mlflow.start_run(run_name="Baseline"):
         # Load data

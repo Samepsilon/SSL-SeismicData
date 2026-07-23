@@ -52,7 +52,7 @@ def train_one_epoch(device, loader, model, criterion, optimizer):
 def mainWmlflow():
 
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
-    mlflow.set_experiment("SSL_Pretraining_SimCLR_6*512_Tuning")
+    mlflow.set_experiment("SSL_Pretraining_SimCLR_Tuning_v2")
     early_stop_counter = 0
     # Start MLflow run for Pre-training
     with mlflow.start_run(run_name="Baseline"):
