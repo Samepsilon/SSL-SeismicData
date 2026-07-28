@@ -88,7 +88,7 @@ def main():
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
     mlflow.set_experiment("SSL_Pretraining_SimCLR_Clustering_v2")
 
-    with mlflow.start_run(run_name="Baseline"):
+    with mlflow.start_run(run_name="run45"):
         # Load data
         X, y = test_set()
 

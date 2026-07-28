@@ -83,6 +83,19 @@ class MAE_Encoder(torch.nn.Module):
 
         return features, backward_indexes
 
+    def forward_full(self, x):
+        patches = self.patchify(x)  # (batch, emb_dim, num_patches)
+        patches = rearrange(patches, 'b c l -> l b c')  # (num_patches, batch, emb_dim)
+        patches = patches + self.pos_embedding
+
+        patches = torch.cat([self.cls_token.expand(-1, patches.shape[1], -1), patches], dim=0)
+        patches = rearrange(patches, 't b c -> b t c')
+        features = self.layer_norm(self.transformer(patches))
+        features = rearrange(features, 'b t c -> t b c')
+
+        return features
+
+
 class MAE_Decoder(torch.nn.Module):
     def __init__(self,
                  sample_size=[3, 2000],

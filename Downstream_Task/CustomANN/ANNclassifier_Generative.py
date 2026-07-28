@@ -18,11 +18,11 @@ from Config.Downstream_Task_Config import ANN
 from Config.dataset_config import extractedSTEAD
 from CustomANN.ANN_Model import CustomANN
 
-from simCLR.simCLR import SimCLR_Transformer
+from Pretraining_Model.Generative_Encoder.MAE.mae.MAE import MAE_ViT
 from utility.build_dataset import CustomTensorDataset
 from utility.encoder_loader import encoder_loader_path
 from utility.Dataset.Dataset_STEAD import train_set, test_set, validation_set
-from utility.model import setup_seed, finetune_epoch, eval_epoch
+from utility.model_MAE import setup_seed, finetune_epoch, eval_epoch
 
 warnings.filterwarnings("ignore")
 
@@ -31,12 +31,12 @@ warnings.filterwarnings("ignore")
 
 def mainWmlflow():
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
-    mlflow.set_experiment("SSL_SimCLR_ANN_Classifier_Experiment")
+    mlflow.set_experiment("SSL_MAE_ANN_Classifier_Experiment")
     if mlflow.active_run():
         mlflow.end_run()
 
     # Start MLflow run for Fine-tuning
-    with mlflow.start_run(run_name="No_Pretraining_0.3_45"):
+    with mlflow.start_run(run_name="Pretraining_1.0_45"):
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {device}")
@@ -88,10 +88,12 @@ def mainWmlflow():
                 drop_last=drop_last,
             )
 
-        projection_dim = 512 #default value
-        n_layers = 6 #default value
-        n_hid = 512 #default value
-        n_head = 16 #default value
+        attention_head = 16
+        decoder_layer = 2
+        encoder_layer = 6
+        emb_dim = 512
+        patch_size = 100
+        mask_ratio = 0.75
 
         train_loader = make_loader(train_x, train_y,drop_last=True)
         val_loader = make_loader(val_X, val_Y, shuffle=False)
@@ -100,30 +102,44 @@ def mainWmlflow():
         if ANN["pretrained"]:
             CKPT_PATH = encoder_loader_path()
             splited_info = Path(CKPT_PATH).stem.split('_')
-            projection_dim = int(splited_info[-1])
-            n_layers = int(splited_info[-4])
-            n_hid = int(splited_info[-3])
-            n_head = int(splited_info[-2])
-            print(projection_dim, n_layers, n_hid, n_head)
-            print(f"Loaded pretrained weights from {CKPT_PATH}")
+            attention_head = int(splited_info[-1])
+            decoder_layer = int(splited_info[-2])
+            encoder_layer = int(splited_info[-3])
+            emb_dim = int(splited_info[-4])
+            patch_size = int(splited_info[-5])
+            mask_ratio = float(splited_info[-6])
 
+        # Log Hyperparameters to MLflow
+        mlflow.log_params({
+            "patch_size": patch_size,
+            "mask_ratio": mask_ratio,
+            "emb_dim": emb_dim,
+            "encoder_layer": encoder_layer,
+            "decoder_layer": decoder_layer,
+            "encoder_head": attention_head,
+            "decoder_head": attention_head
+        })
 
-        encoder = SimCLR_Transformer(
-            projection_dim=projection_dim,
-            n_channel=extractedSTEAD["n_channel"],
-            n_length=extractedSTEAD["n_length"],
-            n_layers=n_layers,
-            n_hid=n_hid,
-            n_head=n_head,
+        fullmodel = MAE_ViT(
+            sample_shape=[extractedSTEAD["n_channel"], extractedSTEAD["n_length"]],
+            patch_size=patch_size,
+            mask_ratio=mask_ratio,
+            emb_dim=emb_dim,
+            encoder_layer=encoder_layer,
+            decoder_layer=decoder_layer,
+            encoder_head=attention_head,
+            decoder_head=attention_head,
         )
 
-
         if ANN["pretrained"]:
-            encoder.load_state_dict(torch.load(CKPT_PATH, map_location=device))
+            fullmodel.load_state_dict(torch.load(CKPT_PATH, map_location=device))
+            print(f"Loaded checkpoint: {CKPT_PATH}")
 
+        encoder = fullmodel.encoder
         encoder = encoder.to(device)
+
         classifier = CustomANN(
-            input_dim=encoder.n_features,
+            input_dim=emb_dim,
             num_classes=extractedSTEAD["n_class"]
         ).to(device)
 

@@ -16,7 +16,7 @@ from Pretraining_Model.utility.Dataset.Dataset_STEAD import train_set
 #module
 from simCLR.simCLR import SimCLR_Transformer
 from simCLR.module.nt_xent import NT_Xent
-from simCLR.module.transformation.TS_transformation import Jittering, Scaling, CustomAugmentation
+from simCLR.module.transformation.TS_transformation import Jittering, Scaling, CustomAugmentation, Scaling, Flipping
 
 #mlflow
 import mlflow
@@ -55,7 +55,7 @@ def mainWmlflow():
     mlflow.set_experiment("SSL_Pretraining_SimCLR_Tuning_v2")
     early_stop_counter = 0
     # Start MLflow run for Pre-training
-    with mlflow.start_run(run_name="Baseline"):
+    with mlflow.start_run(run_name="run45"):
 
         torch.manual_seed(simCLR["seed"])
         np.random.seed(simCLR["seed"])
