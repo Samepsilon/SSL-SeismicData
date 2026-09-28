@@ -1,46 +1,49 @@
-import torch
-import timm
 import numpy as np
-
+import torch
 from einops import repeat, rearrange
 from einops.layers.torch import Rearrange
-
 from timm.models.layers import trunc_normal_
 from timm.models.vision_transformer import Block
 
-def random_indexes(size : int):
+
+def random_indexes(size: int):
     forward_indexes = np.arange(size)
     np.random.shuffle(forward_indexes)
     backward_indexes = np.argsort(forward_indexes)
     return forward_indexes, backward_indexes
 
+
 def take_indexes(sequences, indexes):
     return torch.gather(sequences, 0, repeat(indexes, 't b -> t b c', c=sequences.shape[-1]))
+
 
 class PatchShuffle(torch.nn.Module):
     def __init__(self, ratio) -> None:
         super().__init__()
         self.ratio = ratio
 
-    def forward(self, patches : torch.Tensor):
+    def forward(self, patches: torch.Tensor):
         T, B, C = patches.shape
         remain_T = int(T * (1 - self.ratio))
 
         indexes = [random_indexes(T) for _ in range(B)]
-        forward_indexes = torch.as_tensor(np.stack([i[0] for i in indexes], axis=-1), dtype=torch.long).to(patches.device)
-        backward_indexes = torch.as_tensor(np.stack([i[1] for i in indexes], axis=-1), dtype=torch.long).to(patches.device)
+        forward_indexes = torch.as_tensor(np.stack([i[0] for i in indexes], axis=-1), dtype=torch.long).to(
+            patches.device)
+        backward_indexes = torch.as_tensor(np.stack([i[1] for i in indexes], axis=-1), dtype=torch.long).to(
+            patches.device)
 
         patches = take_indexes(patches, forward_indexes)
         patches = patches[:remain_T]
 
         return patches, forward_indexes, backward_indexes
 
+
 class MAE_Encoder(torch.nn.Module):
     def __init__(self,
                  sample_size=[3, 2000],
                  patch_size=10,
-                 emb_dim=192,  #192
-                 num_layer=2, #12
+                 emb_dim=192,  # 192
+                 num_layer=2,  # 12
                  num_head=3,
                  mask_ratio=0.75,
                  ) -> None:
@@ -54,7 +57,6 @@ class MAE_Encoder(torch.nn.Module):
         self.cls_token = torch.nn.Parameter(torch.zeros(1, 1, emb_dim))
         self.pos_embedding = torch.nn.Parameter(torch.zeros(num_patches, 1, emb_dim))
         self.shuffle = PatchShuffle(mask_ratio)
-
 
         self.patchify = torch.nn.Conv1d(n_channel, emb_dim, kernel_size=patch_size, stride=patch_size)
 
@@ -70,8 +72,8 @@ class MAE_Encoder(torch.nn.Module):
 
     def forward(self, x):
         # x: (batch, n_channel, n_length)
-        patches = self.patchify(x)                       # (batch, emb_dim, num_patches)
-        patches = rearrange(patches, 'b c l -> l b c')    # (num_patches, batch, emb_dim)
+        patches = self.patchify(x)  # (batch, emb_dim, num_patches)
+        patches = rearrange(patches, 'b c l -> l b c')  # (num_patches, batch, emb_dim)
         patches = patches + self.pos_embedding
 
         patches, forward_indexes, backward_indexes = self.shuffle(patches)
@@ -128,15 +130,18 @@ class MAE_Decoder(torch.nn.Module):
 
     def forward(self, features, backward_indexes):
         T = features.shape[0]
-        backward_indexes = torch.cat([torch.zeros(1, backward_indexes.shape[1]).to(backward_indexes), backward_indexes + 1], dim=0)
-        features = torch.cat([features, self.mask_token.expand(backward_indexes.shape[0] - features.shape[0], features.shape[1], -1)], dim=0)
+        backward_indexes = torch.cat(
+            [torch.zeros(1, backward_indexes.shape[1]).to(backward_indexes), backward_indexes + 1], dim=0)
+        features = torch.cat(
+            [features, self.mask_token.expand(backward_indexes.shape[0] - features.shape[0], features.shape[1], -1)],
+            dim=0)
         features = take_indexes(features, backward_indexes)
         features = features + self.pos_embedding
 
         features = rearrange(features, 't b c -> b t c')
         features = self.transformer(features)
         features = rearrange(features, 'b t c -> t b c')
-        features = features[1:] # remove global feature
+        features = features[1:]  # remove global feature
 
         patches = self.head(features)
         mask = torch.zeros_like(patches)
@@ -146,6 +151,7 @@ class MAE_Decoder(torch.nn.Module):
         mask = self.patch2img(mask)
 
         return x, mask
+
 
 class MAE_ViT(torch.nn.Module):
     def __init__(self,
@@ -170,8 +176,9 @@ class MAE_ViT(torch.nn.Module):
         predicted_x, mask = self.decoder(features, backward_indexes)
         return predicted_x, mask
 
+
 class ViT_Classifier(torch.nn.Module):
-    def __init__(self, encoder : MAE_Encoder, num_classes=2) -> None:
+    def __init__(self, encoder: MAE_Encoder, num_classes=2) -> None:
         super().__init__()
         self.cls_token = encoder.cls_token
         self.pos_embedding = encoder.pos_embedding

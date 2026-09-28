@@ -13,15 +13,17 @@ Usage:
 All paths and hyperparameters are set in the CONFIG block below.
 """
 
-import os
 from pathlib import Path
 
+import mlflow
 import numpy as np
+import pandas as pd
+import plotly.express as px
 import torch
-import torch.nn.functional as F
 import umap
-
+from scipy.optimize import linear_sum_assignment
 from sklearn.cluster import KMeans
+from sklearn.manifold import TSNE
 from sklearn.metrics import (
     adjusted_rand_score,
     normalized_mutual_info_score,
@@ -29,27 +31,17 @@ from sklearn.metrics import (
     confusion_matrix,
     accuracy_score,
 )
-from sklearn.preprocessing import StandardScaler
-from scipy.optimize import linear_sum_assignment
 
 from Config.dataset_config import extractedSTEAD
-from Pretraining_Model.Generative_Encoder.MAE.mae.MAE  import MAE_ViT, ViT_Classifier
+from Pretraining_Model.Generative_Encoder.MAE.mae.MAE import MAE_ViT, ViT_Classifier
 from utility.Dataset.Dataset_STEAD import test_set
-
-from sklearn.manifold import TSNE
-
 from utility.encoder_loader import encoder_loader_path
-
-import mlflow
-import pandas as pd
-import plotly.express as px
 
 # CONFIG — edit these to point at your data and model checkpoint
 
 
-BATCH_SIZE  = 128
-N_CLASS     = extractedSTEAD["n_class"]     # 2 for your seismic dataset
-
+BATCH_SIZE = 128
+N_CLASS = extractedSTEAD["n_class"]  # 2 for your seismic dataset
 
 
 # Helpers
@@ -60,7 +52,7 @@ def hungarian_accuracy(y_true: np.ndarray, y_pred: np.ndarray, n_class: int) -> 
     then compute accuracy. Needed because K-Means cluster indices are arbitrary.
     """
     cm = confusion_matrix(y_true, y_pred, labels=list(range(n_class)))
-    row_ind, col_ind = linear_sum_assignment(-cm)   # maximise match
+    row_ind, col_ind = linear_sum_assignment(-cm)  # maximise match
     mapping = {col: row for row, col in zip(row_ind, col_ind)}
     y_remapped = np.array([mapping.get(c, c) for c in y_pred])
     return accuracy_score(y_true, y_remapped), y_remapped
@@ -112,7 +104,7 @@ def main():
 
         # Log Hyperparameters to MLflow
         mlflow.log_params({
-            "patch_size" : patch_size,
+            "patch_size": patch_size,
             "mask_ratio": mask_ratio,
             "emb_dim": emb_dim,
             "encoder_layer": encoder_layer,
@@ -201,7 +193,6 @@ def main():
                 hover_data=["true_label"]
             )
             mlflow.log_figure(fig_cluster, f"interactive_plots/{method_name.lower()}_clusters.html")
-
 
 
 if __name__ == '__main__':

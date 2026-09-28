@@ -1,10 +1,11 @@
-import os
 import math
+
 import torch
+
 from Config.Pretraining_Models_Config import simCLR
 
 
-def load_optimizer( model: torch.nn.Module):
+def load_optimizer(model: torch.nn.Module):
     """
     Build an optimizer (and optional LR scheduler) from the central config dict.
 
@@ -26,16 +27,17 @@ def load_optimizer( model: torch.nn.Module):
             betas=(0.9, 0.95),
             weight_decay=simCLR["weight_decay"],
         )
+
         # Cosine decay with linear warmup
         def lr_func(epoch):
             return min(
                 (epoch + 1) / (simCLR["warmup_epoch"] + 1e-8),
                 0.5 * (math.cos(epoch / simCLR["epochs"] * math.pi) + 1),
             )
+
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_func)
 
     else:
         raise NotImplementedError(f"Unknown optimizer: {simCLR['optimizer']}")
 
     return optimizer, scheduler
-

@@ -1,9 +1,12 @@
-from torch.utils.data import Dataset
 import torch
+from torch.utils.data import Dataset
+
 
 class CustomTensorDataset(Dataset):
-    """TensorDataset with support of transforms.
     """
+    TensorDataset with support of transforms.
+    """
+
     def __init__(self, data, transform=None):
         assert all(data[0].shape[0] == item.shape[0] for item in data)
         self.tensors = data

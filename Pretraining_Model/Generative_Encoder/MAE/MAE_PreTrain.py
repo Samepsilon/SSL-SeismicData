@@ -1,23 +1,21 @@
-import argparse
-import math
-#from torch.utils.tensorboard import SummaryWriter
-from tqdm import tqdm
-from model import *
-import torch.utils.data as Data
-from build_dataset import CustomTensorDataset
-import numpy as np
-
-from mae.MAE import *
-from save_model_MAE import save_model
 import random
-from Config.Pretraining_Models_Config import MAE
-from Config.dataset_config import extractedSTEAD
-from utility.Dataset.Dataset_STEAD import train_set
 
 import mlflow
 from tqdm import tqdm
 
+from Config.Pretraining_Models_Config import MAE
+from Config.dataset_config import extractedSTEAD
+from build_dataset import CustomTensorDataset
+from mae.MAE import *
+from model import *
+from save_model_MAE import save_model
+from utility.Dataset.Dataset_STEAD import train_set
+
+
 def setup_seed(seed=42):
+    """
+    seed setup for reproducibility
+    """
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
@@ -26,11 +24,14 @@ def setup_seed(seed=42):
 
 
 def main():
+    """
+    Implementation of the training loop for MAE
+    """
 
     setup_seed(MAE["seed"])
 
     batch_size = MAE["batch_size"]
-    load_batch_size = min(MAE["max_device_batch_size"],MAE["batch_size"])
+    load_batch_size = min(MAE["max_device_batch_size"], MAE["batch_size"])
 
     assert batch_size % load_batch_size == 0
     steps_per_update = batch_size // load_batch_size
@@ -40,8 +41,6 @@ def main():
 
     # Load dataset
     print("Dataset:", extractedSTEAD["name"])
-    dataset_name = globals()['dataset_' + extractedSTEAD["name"]]
-
     train_x, train_y = train_set()
 
     train_dataset = CustomTensorDataset(
@@ -55,12 +54,15 @@ def main():
     )
 
     model = MAE_ViT(
-        sample_shape=[extractedSTEAD["n_channel"], extractedSTEAD["n_length"] ],
-        patch_size=(extractedSTEAD["n_channel"]),
-        mask_ratio=MAE["mask_ratio"]
+        sample_shape=[extractedSTEAD["n_channel"], extractedSTEAD["n_length"]],
+        patch_size=MAE["patch_size"],
+        mask_ratio=MAE["mask_ratio"],
+        emb_dim=MAE["emb_dim"],
+        encoder_layer=MAE["encoder_layer"],
+        decoder_layer=MAE["decoder_layer"],
+        encoder_head=MAE["attention_head"],
+        decoder_head=MAE["attention_head"],
     ).to(device)
-
-    model = torch.compile(model)
 
     optim = torch.optim.AdamW(
         model.parameters(),
@@ -72,7 +74,6 @@ def main():
     lr_func = lambda epoch: min((epoch + 1) / (MAE["warmup_epoch"] + 1e-8),
                                 0.5 * (math.cos(epoch / MAE["total_epoch"] * math.pi) + 1))
     lr_scheduler = torch.optim.lr_scheduler.LambdaLR(optim, lr_lambda=lr_func)
-
 
     step_count = 0
     optim.zero_grad()
@@ -98,26 +99,42 @@ def main():
         ''' save pre-trained model '''
         if avg_loss < min_loss:
             min_loss = avg_loss
-            save_model(model,"MAE", extractedSTEAD["name"], MAE["mask_ratio"])
+            save_model(model, "MAE", extractedSTEAD["name"], MAE["mask_ratio"])
             print("Model update with loss {}.".format(min_loss))
 
+
 def mainWmlflow():
+    """
+    Implementation of the training loop for MAE, with mlflow logging
+    """
+    # URI for the sqlite database used by MLflow
     mlflow.set_tracking_uri(r"sqlite:///D:\Desktop\Intership IT\SSL&SeismicData\SSL_PT_FT_MLflow.db")
+    # Name for the experiment in the MLflow system
     mlflow.set_experiment("SSL_Pretraining_Tuning_v2")
 
+    # Start MLflow run for Pre-training, name of the run for mlflow system
     with mlflow.start_run(run_name="run45"):
 
+        # mlflow logging of training parameters
         mlflow.log_params({
             "seed": MAE["seed"],
-            "batch_size": MAE["batch_size"],
             "base_learning_rate": MAE["base_learning_rate"],
             "weight_decay": MAE["weight_decay"],
-            "mask_ratio": MAE["mask_ratio"],
             "total_epoch": MAE["total_epoch"],
             "warmup_epoch": MAE["warmup_epoch"],
+
+        })
+
+        # mlflow logging of MAE model parameters
+        mlflow.log_params({
+            "batch_size": MAE["batch_size"],
             "patch_size": MAE["patch_size"],
             "emb_dim": MAE["emb_dim"],
-            "model_architecture": "MAE_Transformer",
+            "mask_ratio": MAE["mask_ratio"],
+            "encoder_layer": MAE["encoder_layer"],
+            "decoder_layer": MAE["decoder_layer"],
+            "encoder_head": MAE["attention_head"],
+            "decoder_head": MAE["attention_head"]
         })
 
         setup_seed(MAE["seed"])
@@ -146,6 +163,7 @@ def mainWmlflow():
             shuffle=True
         )
 
+        # initilisation of the MAE model
         model = MAE_ViT(
             sample_shape=[extractedSTEAD["n_channel"], extractedSTEAD["n_length"]],
             patch_size=MAE["patch_size"],
@@ -156,7 +174,6 @@ def mainWmlflow():
             encoder_head=MAE["attention_head"],
             decoder_head=MAE["attention_head"],
         ).to(device)
-
 
         optim = torch.optim.AdamW(
             model.parameters(),
@@ -172,13 +189,14 @@ def mainWmlflow():
         step_count = 0
         optim.zero_grad()
         min_loss = 100
+        early_stop_counter = 0
+
         for epoch in range(MAE["total_epoch"]):
+
             lr = optim.param_groups[0]["lr"]
-
-
-
             model.train()
             losses = []
+
             for sample, label in tqdm(iter(train_loader)):
                 step_count += 1
                 sample = sample.to(device)
@@ -201,7 +219,8 @@ def mainWmlflow():
             ''' save pre-trained model '''
             if avg_loss < min_loss:
                 min_loss = avg_loss
-                save_model(model, "MAE", extractedSTEAD["name"], MAE["mask_ratio"],MAE["patch_size"],MAE["emb_dim"],MAE["encoder_layer"],MAE["decoder_layer"],MAE["attention_head"])
+                save_model(model, "MAE", extractedSTEAD["name"], MAE["mask_ratio"], MAE["patch_size"], MAE["emb_dim"],
+                           MAE["encoder_layer"], MAE["decoder_layer"], MAE["attention_head"])
                 print("Model update with loss {}.".format(min_loss))
 
         mlflow.log_metric("best_pretrain_loss", min_loss)
@@ -209,6 +228,3 @@ def mainWmlflow():
 
 if __name__ == '__main__':
     mainWmlflow()
-
-
-

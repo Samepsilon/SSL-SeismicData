@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
-import torch.distributed as dist
+
 from .gather import GatherLayer
+
 
 class NT_Xent(nn.Module):
     def __init__(self, batch_size, temperature, world_size=1):
@@ -28,7 +29,7 @@ class NT_Xent(nn.Module):
         We do not sample negative examples explicitly.
         Instead, given a positive pair, similar to (Chen et al., 2017), we treat the other 2(N − 1) augmented examples within a minibatch as negative examples.
         """
-        N = 2 * self.batch_size #* self.world_size
+        N = 2 * self.batch_size  # * self.world_size
 
         z = torch.cat((z_i, z_j), dim=0)
         if self.world_size > 1:

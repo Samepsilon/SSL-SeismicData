@@ -13,7 +13,6 @@ def encoder_loader_path():
 
     subfolders = [f for f in model_path.iterdir() if f.is_dir()]
 
-
     print("\n Folder Selection ")
     for index, folder in enumerate(subfolders):
         print(f"[{index + 1}] {folder.name}")
@@ -54,6 +53,7 @@ def encoder_loader_path():
     # 6. Return the full absolute path
     print(f"\n You selected: {selected_file.name}")
     return str(selected_file.resolve())
+
 
 if __name__ == '__main__':
     encoder_loader_path()

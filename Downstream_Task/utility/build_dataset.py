@@ -16,8 +16,8 @@ class CustomTensorDataset(Dataset):
     def __init__(self, data, transform_A=None, transform_B=None):
         assert all(data[0].shape[0] == item.shape[0] for item in data), \
             "X and y must have the same number of samples"
-        self.X           = data[0]
-        self.y           = data[1]
+        self.X = data[0]
+        self.y = data[1]
         self.transform_A = transform_A
         self.transform_B = transform_B
 
