@@ -55,12 +55,13 @@ def _mean_metrics(records: list[dict]) -> dict:
 
 
 def finetune_epoch(device, loader, encoder, classifier, criterion, optimizer):
+    """finetune the model for one epoch with the additional data"""
     encoder.train()
     classifier.train()
 
     losses, metrics_list = [], []
 
-    # Wrap your loader with tqdm
+    # Wrap loader with tqdm
     loop = tqdm(loader, desc="Finetune Epoch", leave=False)
 
     for x, _, y in loop:
@@ -91,6 +92,7 @@ def finetune_epoch(device, loader, encoder, classifier, criterion, optimizer):
 
 
 def eval_epoch(device, loader, encoder, classifier, criterion):
+    """return the loss + metrics for the epoch"""
     encoder.eval()
     classifier.eval()
 

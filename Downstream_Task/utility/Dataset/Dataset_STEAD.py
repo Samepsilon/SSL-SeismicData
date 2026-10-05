@@ -30,18 +30,21 @@ y_val_path = VALIDATION_DIR / "y.npy"
 
 
 def train_set():
+    """return the training set"""
     train_x = np.load(X_train_path, allow_pickle=True)
     train_y = np.load(y_train_path, allow_pickle=True)
     return train_x, train_y
 
 
 def test_set():
+    """return the testing set"""
     test_x = np.load(X_test_path, allow_pickle=True)
     test_y = np.load(y_test_path, allow_pickle=True)
     return test_x, test_y
 
 
 def validation_set():
+    """return the validation set"""
     val_x = np.load(X_val_path, allow_pickle=True)
     val_y = np.load(y_val_path, allow_pickle=True)
     return val_x, val_y

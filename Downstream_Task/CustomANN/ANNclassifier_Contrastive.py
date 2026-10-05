@@ -18,7 +18,7 @@ from simCLR.simCLR import SimCLR_Transformer
 from utility.Dataset.Dataset_STEAD import train_set, test_set, validation_set
 from utility.build_dataset import CustomTensorDataset
 from utility.encoder_loader import encoder_loader_path
-from utility.model import setup_seed, finetune_epoch, eval_epoch
+from utility.model_SimCLR import setup_seed, finetune_epoch, eval_epoch
 
 warnings.filterwarnings("ignore")
 

@@ -7,19 +7,20 @@ simCLR = {
     #  pretraining
     "seed": 45,
     "batch_size": 512,
-    "epochs": 50,
+    "epochs": 200,
     "optimizer": "AdamW",  # "Adam" or "AdamW"
     "lr": 3e-4,
     "weight_decay": 1e-4,
-    "warmup_epoch": 10,
+    "warmup_epoch": 25,
     "temperature": 0.5,
     "projection_dim": 512,
     "early_stopping_patience": 5,
 
     # custom augmenter parameter
-    "n_speed_change": 1,
+    "n_speed_change": 4,
     "max_speed_ratio": 2.0,
-    "noise_scale": 0.02,
+    "noise_scale": 0.01,
+    "probability_for_dropout": 0.1,
 }
 
 MAE = {

@@ -1,5 +1,5 @@
 """
-clustering_analysis.py  —  evaluate SimCLR pretrained encoder via clustering.
+Evaluate SimCLR pretrained encoder via clustering.
 
 Loads a dataset (X, y), extracts encoder representations h, then:
   1. Clusters h with K-Means (k = n_class)
@@ -7,10 +7,6 @@ Loads a dataset (X, y), extracts encoder representations h, then:
   3. Plots UMAP / t-SNE colored by true label and by cluster assignment
   4. Plots a confusion matrix between clusters and true labels
 
-Usage:
-    python clustering_analysis.py
-
-All paths and hyperparameters are set in the CONFIG block below.
 """
 
 from pathlib import Path
@@ -37,7 +33,7 @@ from simCLR.simCLR import SimCLR_Transformer
 from utility.Dataset.Dataset_STEAD import test_set
 from utility.encoder_loader import encoder_loader_path
 
-# CONFIG — edit these to point at your data and model checkpoint
+# CONFIG
 
 
 BATCH_SIZE = 128

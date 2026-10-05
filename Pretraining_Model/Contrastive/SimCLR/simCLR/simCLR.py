@@ -4,9 +4,6 @@ from torch.nn import TransformerEncoder, TransformerEncoderLayer
 
 class SimCLR_Transformer(nn.Module):
     """Implementation of SimCLR using pyTorch transformer
-
-
-
     """
 
     def __init__(self, projection_dim, n_channel, n_length=240, aug_mode=None, n_head=2, n_hid=512, n_layers=4):

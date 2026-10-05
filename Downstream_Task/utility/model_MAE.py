@@ -55,19 +55,19 @@ def _mean_metrics(records: list[dict]) -> dict:
 
 
 def finetune_epoch(device, loader, encoder, classifier, criterion, optimizer):
+    """finetune the model for one epoch with the additional data"""
     encoder.train()
     classifier.train()
 
     losses, metrics_list = [], []
 
-    # Wrap your loader with tqdm
+    # Wrap loader with tqdm
     loop = tqdm(loader, desc="Finetune Epoch", leave=False)
 
     for x, _, y in loop:
         x = x.to(device)
         y = y.squeeze(-1).long().to(device)
 
-        # forward_full: no masking/shuffling, so every patch is seen.
         # features: (num_patches + 1, batch, emb_dim); index 0 is the cls token.
         features = encoder.forward_full(x)
         h = features[0]  # (batch, emb_dim)
@@ -87,13 +87,14 @@ def finetune_epoch(device, loader, encoder, classifier, criterion, optimizer):
         losses.append(loss.item())
         metrics_list.append(_compute_metrics(extractedSTEAD["n_class"], y.cpu(), logits.cpu()))
 
-        # Update the progress bar with the current loss
+        # Update the progress bar
         loop.set_postfix(loss=loss.item())
 
     return sum(losses) / len(losses), _mean_metrics(metrics_list)
 
 
 def eval_epoch(device, loader, encoder, classifier, criterion):
+    """return the loss + metrics for the epoch"""
     encoder.eval()
     classifier.eval()
 

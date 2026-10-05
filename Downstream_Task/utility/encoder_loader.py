@@ -17,7 +17,7 @@ def encoder_loader_path():
     for index, folder in enumerate(subfolders):
         print(f"[{index + 1}] {folder.name}")
 
-    # 3. Get user choice for the folder with error handling
+    # Get the user choice for the folder
     while True:
         try:
             folder_choice = int(input("\nEnter the number of the folder: ")) - 1
@@ -50,7 +50,7 @@ def encoder_loader_path():
         except ValueError:
             print("Invalid input. Please enter a valid number.")
 
-    # 6. Return the full absolute path
+    # Return the absolute path
     print(f"\n You selected: {selected_file.name}")
     return str(selected_file.resolve())
 
